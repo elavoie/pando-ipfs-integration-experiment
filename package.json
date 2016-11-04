@@ -1,0 +1,19 @@
+{
+  "name": "pando.js",
+  "version": "0.1.0",
+  "description": "Decentralized Volunteer Computing Platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:elavoie/pando.js.git"
+  },
+  "author": "Erick Lavoie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elavoie/pando.js/issues"
+  },
+  "homepage": "https://github.com/elavoie/pando.js"
+}
