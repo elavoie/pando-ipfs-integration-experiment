@@ -54,10 +54,19 @@ function node (cb) {
     cb(null, pando._node)
 }
 
+function addresses (node) {
+    console.log('Pando node listening on:')
+    node._libp2p.peerInfo.multiaddrs.forEach((a) => {
+        console.log(a.toString() + '/ipfs/' + node._libp2p.peerInfo.id.toB58String()) 
+    })
+}
+
 var pando = promisify({
     _node: null,
+    node: node,
     start: saveNode(start),
-    node: node
 })
+
+pando.addresses = addresses
 
 module.exports = pando
