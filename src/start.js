@@ -74,65 +74,68 @@ module.exports = function (options, cb) {
         // We need to create a complete peer info (using the peer id) for using the
         // lower-level apis of libp2p for direct connection between nodes
         if (options.verbose) { console.log('Retrieving PeerId') }
-        var peerId = PeerId.createFromPrivKey(config.Identity.PrivKey) 
-        var peerInfo = new PeerInfo(peerId)
+        PeerId.createFromPrivKey(config.Identity.PrivKey, (err, peerId) => {
+            if (err) return cb(err)
 
-        // Initialize ipfs and obtain network addresses (including the public IP
-        // for nodes behind a NAT)
-        if (options.verbose) { console.log('Starting ipfs api') }
-        var ipfs = new IPFSApi()
+            var peerInfo = new PeerInfo(peerId)
 
-        if (options.verbose) { console.log('Retrieving network addresses from daemon') }
-        ipfs.id()
-        .then((node) => {
-            // We use the addresses obtained using the go implementation to have
-            // both the LAN and public IP address and derive new addresses for the
-            // communication network with different ports (+1, typically 4002)
-            if (options.verbose) { console.log('Retrieving daemon multi-addresses') }
-            mas = node.addresses
-            .map(multiaddr)
-            .map((a) => a.decapsulate('ipfs'))
+            // Initialize ipfs and obtain network addresses (including the public IP
+            // for nodes behind a NAT)
+            if (options.verbose) { console.log('Starting ipfs api') }
+            var ipfs = new IPFSApi()
 
-            if (options.verbose) { console.log('Retrieved:') }
+            if (options.verbose) { console.log('Retrieving network addresses from daemon') }
+            ipfs.id()
+            .then((node) => {
+                // We use the addresses obtained using the go implementation to have
+                // both the LAN and public IP address and derive new addresses for the
+                // communication network with different ports (+1, typically 4002)
+                if (options.verbose) { console.log('Retrieving daemon multi-addresses') }
+                mas = node.addresses
+                .map(multiaddr)
+                .map((a) => a.decapsulate('ipfs'))
 
-            if (options.verbose) { console.log('Creating new multi-addresses') }
-            mas.forEach((ma) => {
-                ma = newMultiAddr(ma)
+                if (options.verbose) { console.log('Retrieved:') }
 
-                if (ma !== null) {
-                    peerInfo.multiaddr.add(ma)
+                if (options.verbose) { console.log('Creating new multi-addresses') }
+                mas.forEach((ma) => {
+                    ma = newMultiAddr(ma)
+
+                    if (ma !== null) {
+                        peerInfo.multiaddr.add(ma)
+                    }
+                })
+
+                if (options.verbose) {
+                    console.log('PeerInfo:')
+                    console.log(peerInfo)
                 }
-            })
 
-            if (options.verbose) {
-                console.log('PeerInfo:')
-                console.log(peerInfo)
-            }
+                if (options.verbose) { console.log('Creating communication node') }
+                var net = new Libp2p.Node(peerInfo)
 
-            if (options.verbose) { console.log('Creating communication node') }
-            var net = new Libp2p.Node(peerInfo)
+                if (options.verbose) { console.log('Starting communication node') }
+                net.start((err) => {
+                    if (err) cb(err)
 
-            if (options.verbose) { console.log('Starting communication node') }
-            net.start((err) => {
-                if (err) cb(err)
+                    if (options.verbose) { console.log('Adding pando protocols') }
+                    net.handle('/hello/1.0.0', (protocol, conn) => {
+                        console.log('received hello')
+                        pull(
+                            pull.values(['world']),
+                            conn
+                        )
+                    })
 
-                if (options.verbose) { console.log('Adding pando protocols') }
-                net.handle('/hello/1.0.0', (protocol, conn) => {
-                    console.log('received hello')
-                    pull(
-                        pull.values(['world']),
-                        conn
-                    )
+                    if (options.verbose) { console.log('Communication node ready, listening on:') }
+                    peerInfo.multiaddrs.forEach((ma) => {
+                        console.log(ma.toString() + '/ipfs/' + peerId.toB58String())
+                    })
+
+                    cb(null, new Node(net, ipfs))
                 })
-
-                if (options.verbose) { console.log('Communication node ready, listening on:') }
-                peerInfo.multiaddrs.forEach((ma) => {
-                    console.log(ma.toString() + '/ipfs/' + peerId.toB58String())
-                })
-
-                cb(null, new Node(net, ipfs))
             })
-        }).catch(cb)
+        })
     } catch (err) {
         cb(err)
     }
