@@ -5,6 +5,7 @@ var Libp2p = require('libp2p-ipfs')
 var PeerId = require('peer-id')
 var PeerInfo = require('peer-info')
 var multiaddr = require('multiaddr')
+var ip = require('ip')
 
 function getUserHome() {
   return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -15,35 +16,6 @@ function getUserHome() {
 function Node(libp2p, ipfs) {
     this._libp2p = libp2p
     this._ipfs = ipfs
-}
-
-function newMultiAddr(ma) {
-    var na = ma.nodeAddress()
-
-    // Do not use IPv6 addresses on node,
-    // see https://github.com/ipfs/js-ipfs/issues/228
-    if (na.family !== 'IPv4') {
-        return null
-    }
-
-    // Hack to avoid public facing adresses
-    var port = Number.parseInt(na.port)
-    if (port >= 5000) { 
-        return null
-    }
-    na.port = (port + 1).toString()
-
-    // Only retain tcp and udp addresses
-    var protocol = null
-    if (ma.toString().indexOf('tcp') >= 0) {
-        protocol = 'tcp'
-    } else if (ma.toString().indexOf('udp') >= 0) {
-        protocol = 'udp'
-    } else {
-        return null
-    }
-
-    return multiaddr.fromNodeAddress(na, protocol)
 }
 
 // Assumptions:
@@ -95,16 +67,17 @@ module.exports = function (options, cb) {
                 .map(multiaddr)
                 .map((a) => a.decapsulate('ipfs'))
 
-                if (options.verbose) { console.log('Retrieved:') }
+                if (options.verbose) { 
+                    console.log('Retrieved:') 
+                    mas.forEach((a) => { console.log(a) })
+                }
 
-                if (options.verbose) { console.log('Creating new multi-addresses') }
-                mas.forEach((ma) => {
-                    ma = newMultiAddr(ma)
-
-                    if (ma !== null) {
-                        peerInfo.multiaddr.add(ma)
-                    }
-                })
+                if (options.verbose) { console.log('Creating a new multi-addresses') }
+                peerInfo.multiaddr.add(multiaddr.fromNodeAddress({
+                    family: 'IPv4',
+                    address: ip.address(),
+                    port: 4002
+                }, 'tcp'))
 
                 if (options.verbose) {
                     console.log('PeerInfo:')
@@ -134,7 +107,7 @@ module.exports = function (options, cb) {
 
                     cb(null, new Node(net, ipfs))
                 })
-            })
+            }).catch(cb)
         })
     } catch (err) {
         cb(err)

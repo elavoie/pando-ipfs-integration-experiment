@@ -22,6 +22,7 @@
     "save-pixels": "^2.3.4"
   },
   "dependencies": {
+    "ip": "^1.1.4",
     "ipfs-api": "^11.1.0",
     "libp2p-ipfs": "^0.15.0",
     "multiaddr": "^2.0.3",
