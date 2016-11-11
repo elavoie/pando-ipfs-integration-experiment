@@ -6,6 +6,7 @@ var PeerId = require('peer-id')
 var PeerInfo = require('peer-info')
 var multiaddr = require('multiaddr')
 var ip = require('ip')
+var pull = require('pull-stream')
 
 function getUserHome() {
   return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
