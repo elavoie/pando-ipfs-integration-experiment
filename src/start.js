@@ -70,9 +70,12 @@ module.exports = function (node, cb) {
   // Connecting to ipfs daemon
   utils.isIpfsRunning((running) => {
     if (!running) {
-      var err = new Error('ipfs not running, aborting')
-      log.error(err)
-      return cb(err)
+      // TODO: Reactivate when the file sharing protocol
+      //       becomes necessary
+      // var err = new Error('ipfs not running, aborting')
+      // log.error(err)
+      // return cb(err)
+      log('WARNING: ipfs not running')
     }
 
     try {
