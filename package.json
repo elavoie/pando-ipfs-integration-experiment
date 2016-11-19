@@ -22,12 +22,17 @@
     "save-pixels": "^2.3.4"
   },
   "dependencies": {
+    "current-processes": "^0.2.1",
+    "debug": "^2.3.2",
     "ip": "^1.1.4",
     "ipfs-api": "^11.1.0",
     "libp2p-ipfs": "^0.15.0",
     "multiaddr": "^2.0.3",
+    "nor-function": "^1.0.0",
     "peer-id": "^0.8.0",
     "peer-info": "^0.8.0",
+    "pify": "^2.3.0",
+    "pull-paramap": "^1.2.1",
     "pull-promise": "^2.0.0",
     "pull-stream": "^3.5.0"
   }
