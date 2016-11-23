@@ -28,8 +28,8 @@ var createPeerInfo = pify(function createPeerInfo (config, cb) {
   } else {
     log('creating a new peer id')
     PeerId.create((err, peerId) => {
-        if (err) throw err    
-        cb(null, new PeerInfo(peerId))
+      if (err) throw err
+      cb(null, new PeerInfo(peerId))
     })
   }
 })
