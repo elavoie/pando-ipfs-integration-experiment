@@ -28,7 +28,8 @@ function Node (options) {
   this._options = {
     'repoPath': options.repoPath || path.join(getUserHome(), '.ipfs'),
     'silent': options.silent || false,
-    'port': Object.keys(options).indexOf('port') >= 0 ? options.port : 4002
+    'port': Object.keys(options).indexOf('port') >= 0 ? options.port : 4002,
+    'ws-port': Object.keys(options).indexOf('ws-port') >= 0 ? options['ws-port'] : 3000
   }
   // libp2p is used for communication between nodes within a dedicated for Pando network
   this._libp2p = null
