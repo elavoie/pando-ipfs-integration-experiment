@@ -13,17 +13,22 @@ var utils = require('./utils')
 var path = require('path')
 
 var createPeerInfo = pify(function createPeerInfo (config, cb) {
-  log('retrieving peerid')
-  PeerId.createFromPrivKey(config.Identity.PrivKey, (err, peerId) => {
-    if (err) {
-      log.err(err)
-      return cb(err)
-    }
+  if (config) {
+    log('retrieving peerid')
+    PeerId.createFromPrivKey(config.Identity.PrivKey, (err, peerId) => {
+      if (err) {
+        log.err(err)
+        return cb(err)
+      }
 
-    log('retrieved id: ' + peerId.toB58String())
-    var peerInfo = new PeerInfo(peerId)
-    cb(null, peerInfo)
-  })
+      log('retrieved id: ' + peerId.toB58String())
+      var peerInfo = new PeerInfo(peerId)
+      cb(null, peerInfo)
+    })
+  } else {
+    log('creating a new peerid')
+    PeerId.create(cb)
+  }
 })
 
 var startNetwork = pify(function startNetwork (node, cb) {
@@ -53,18 +58,17 @@ module.exports = function (node, cb) {
     throw new Error('Invalid callback function')
   }
 
-  // We need the private key to create the peer Id but the API does not provide it
-  // so we are retrieving it directly from the config file. The node shares
-  // the same id on both the IPFS and Pando (libp2p) networks
-  //
-  // Assumption:
-  // - ipfs init has been run previously to initialize the ipfs repo
+  // When using IPFS, retrieve the PeerId in the config file so the node shares
+  // the same id on both the IPFS and Pando (libp2p) networks. If no IPFS repository
+  // has been initialized already create a new PeerId.
+  var config
   try {
     log('Reading config')
-    var config = JSON.parse(fs.readFileSync(path.join(node._options.repoPath, 'config')))
+    config = JSON.parse(fs.readFileSync(path.join(node._options.repoPath, 'config')))
   } catch (err) {
-    log.error(err)
-    cb(err)
+    log(err)
+    log('creating a new peer id')
+    config = null
   }
 
   // Connecting to ipfs daemon
