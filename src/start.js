@@ -102,11 +102,21 @@ module.exports = function (node, cb) {
       node._libp2p = new libp2p.Node(peerInfo)
 
       log('Adding multiaddresses')
+
+      // TCP
       node._libp2p.peerInfo.multiaddr.add(multiaddr.fromNodeAddress({
         family: 'IPv4',
         address: '0.0.0.0',
         port: node._options.port
       }, 'tcp'))
+
+      // Websocket
+      var ws = multiaddr.fromNodeAddress({
+        family: 'IPv4',
+        address: '127.0.0.1',
+        port: Math.floor(Math.random() * 61000 + 4000)
+      }, 'tcp').encapsulate('ws')
+      node._libp2p.peerInfo.multiaddr.add(ws)
 
       startNetwork(node, cb)
     })

@@ -5,7 +5,7 @@ var node = new pando.Node()
 
 pull(
   pull.count(1000),
-  // node.asyncMap should be a drop-in replacement for pull.asyncMap
+  // node.distmap should be a drop-in replacement for pull.asyncMap
   node.distmap(function (data, cb) {
     console.log('processing: ' + JSON.stringify(data))
     setTimeout(() => cb(null, data * data), Math.random() * 5000)
