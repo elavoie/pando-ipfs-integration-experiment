@@ -4,11 +4,11 @@ var pull = require('pull-stream')
 var node = new pando.Node()
 
 pull(
-  pull.count(100),
+  pull.count(1000),
   // node.asyncMap should be a drop-in replacement for pull.asyncMap
   node.distmap(function (data, cb) {
     console.log('processing: ' + JSON.stringify(data))
-    setTimeout(() => cb(null, data * data), Math.random() * 1000)
+    setTimeout(() => cb(null, data * data), Math.random() * 5000)
   }),
   pull.drain(
     (x) => console.log('output: ' + x),
