@@ -26,8 +26,11 @@ var createPeerInfo = pify(function createPeerInfo (config, cb) {
       cb(null, peerInfo)
     })
   } else {
-    log('creating a new peerid')
-    PeerId.create(cb)
+    log('creating a new peer id')
+    PeerId.create((err, peerId) => {
+        if (err) throw err    
+        cb(null, new PeerInfo(peerId))
+    })
   }
 })
 
